@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADM2 Ticket Desk</title>
+<style>
+  :root{
+    --ink:#1c2733;
+    --slate:#33414f;
+    --paper:#f5f2eb;
+    --panel:#ffffff;
+    --line:#d9d2c4;
+    --amber:#c2641f;
+    --amber-soft:#f3e2cf;
+    --teal:#1f6b6b;
+    --teal-soft:#d8e9e7;
+    --green:#3a7d44;
+    --green-soft:#dcead d;
+    --red:#a8362f;
+    --red-soft:#f1d9d6;
+    --grey-soft:#e7e3d9;
+    --mut:#6c7480;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",-apple-system,system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    padding:28px 24px 60px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .masthead{
+    border-bottom:2px solid var(--ink);
+    padding-bottom:14px;
+    margin-bottom:6px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .masthead h1{
+    font-size:30px;
+    font-weight:800;
+    letter-spacing:-0.5px;
+  }
+  .masthead .eyebrow{
+    font-size:11px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--amber);
+    font-weight:700;
+    display:block;
+    margin-bottom:2px;
+  }
+  .datestamp{
+    font-size:12px;
+    color:var(--mut);
+    letter-spacing:.5px;
+  }
+  /* stats */
+  .stats{
+    display:flex;
+    gap:0;
+    border:1px solid var(--line);
+    background:var(--panel);
+    margin:18px 0;
+    border-radius:6px;
+    overflow:hidden;
+    flex-wrap:wrap;
+  }
+  .stat{
+    flex:1;
+    min-width:120px;
+    padding:14px 18px;
+    border-right:1px solid var(--line);
+  }
+  .stat:last-child{border-right:none}
+  .stat .num{font-size:26px;font-weight:800;line-height:1}
+  .stat .lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mut);margin-top:6px}
+  .stat.a .num{color:var(--amber)}
+  .stat.t .num{color:var(--teal)}
+  .stat.g .num{color:var(--green)}
+  .stat.r .num{color:var(--red)}
+  /* tabs */
+  .tabs{
+    display:flex;
+    gap:4px;
+    border-bottom:2px solid var(--ink);
+    margin:18px 0 16px;
+  }
+  .tab{
+    background:transparent;
+    border:1px solid var(--line);
+    border-bottom:none;
+    border-radius:7px 7px 0 0;
+    padding:10px 20px;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.3px;
+    color:var(--mut);
+    margin-bottom:-2px;
+  }
+  .tab:hover{color:var(--slate);background:var(--grey-soft)}
+  .tab.active{
+    background:var(--ink);
+    color:#f5f2eb;
+    border-color:var(--ink);
+  }
+  .panel{display:none}
+  .panel.active{display:block}
+  /* toolbar */
+  .toolbar{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .search{
+    flex:1;
+    min-width:200px;
+    padding:9px 13px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-size:14px;
+    background:var(--panel);
+    color:var(--ink);
+  }
+  .search:focus{outline:2px solid var(--amber);outline-offset:-1px}
+  select.filter{
+    padding:9px 11px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-size:13px;
+    background:var(--panel);
+    color:var(--slate);
+  }
+  button{
+    font-family:inherit;
+    cursor:pointer;
+    border:none;
+    border-radius:6px;
+    font-size:13px;
+    font-weight:600;
+  }
+  .btn-add{
+    background:var(--ink);
+    color:#fff;
+    padding:9px 18px;
+    letter-spacing:.3px;
+  }
+  .btn-add:hover{background:var(--slate)}
+  .btn-ghost{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--slate);
+    padding:9px 14px;
+  }
+  .btn-ghost:hover{background:var(--grey-soft)}
+  /* table */
+  .tablewrap{
+    border:1px solid var(--line);
+    border-radius:6px;
+    overflow-x:auto;
+    background:var(--panel);
+  }
+  table{border-collapse:collapse;width:100%;min-width:980px}
+  thead th{
+    background:var(--ink);
+    color:#f5f2eb;
+    font-size:10px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    text-align:left;
+    padding:11px 12px;
+    font-weight:700;
+    white-space:nowrap;
+    position:sticky;
+    top:0;
+  }
+  thead th.sortable{cursor:pointer;user-select:none}
+  thead th.sortable:hover{background:var(--slate)}
+  thead th .arrow{
+    display:inline-block;
+    margin-left:5px;
+    opacity:.35;
+    font-size:9px;
+  }
+  thead th.sorted .arrow{opacity:1;color:#f0c089}
+  tbody td{
+    padding:11px 12px;
+    border-bottom:1px solid var(--line);
+    font-size:13px;
+    vertical-align:top;
+  }
+  tbody tr:hover{background:#faf8f2}
+  tbody tr:last-child td{border-bottom:none}
+  .inc-no{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .desc{max-width:260px;color:var(--slate);line-height:1.4}
+  .muted{color:var(--mut)}
+  .pill{
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.3px;
+    white-space:nowrap;
+  }
+  .pill.new{background:var(--amber-soft);color:var(--amber)}
+  .pill.progress{background:var(--teal-soft);color:var(--teal)}
+  .pill.testing{background:#e8e0f0;color:#6b4796}
+  .pill.resolved{background:#dceadd;color:var(--green)}
+  .pill.hold{background:var(--red-soft);color:var(--red)}
+  .pill.closed{background:var(--grey-soft);color:var(--slate)}
+  .row-actions{white-space:nowrap}
+  .row-actions button{
+    background:transparent;
+    color:var(--mut);
+    padding:4px 7px;
+    font-size:12px;
+  }
+  .row-actions button:hover{color:var(--ink)}
+  .row-actions .del:hover{color:var(--red)}
+  .empty{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--mut);
+  }
+  .empty strong{display:block;color:var(--slate);font-size:15px;margin-bottom:6px}
+  /* modal */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(28,39,51,.45);
+    display:none;
+    align-items:flex-start;
+    justify-content:center;
+    padding:40px 16px;
+    overflow-y:auto;
+    z-index:50;
+  }
+  .overlay.show{display:flex}
+  .modal{
+    background:var(--panel);
+    border-radius:10px;
+    width:100%;
+    max-width:560px;
+    padding:26px 28px 28px;
+    box-shadow:0 18px 50px rgba(28,39,51,.3);
+  }
+  .modal h2{font-size:19px;margin-bottom:2px}
+  .modal .sub{font-size:12px;color:var(--mut);margin-bottom:18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  .field{display:flex;flex-direction:column;gap:5px;margin-bottom:13px}
+  .field.full{grid-column:1 / -1}
+  .field label{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--mut);font-weight:600}
+  .field input,.field select,.field textarea{
+    padding:9px 11px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-size:13px;
+    font-family:inherit;
+    background:#fff;
+    color:var(--ink);
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--amber);outline-offset:-1px}
+  .field textarea{resize:vertical;min-height:60px}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+  .loading{text-align:center;padding:30px;color:var(--mut);font-size:13px}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr}.masthead h1{font-size:24px}}
+</style>
+</head>
+<body>
+  <header class="masthead">
+    <div>
+      <h1>ADM2 Ticket Desk</h1>
+    </div>
+    <div class="datestamp" id="datestamp"></div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" id="tabTickets" onclick="switchTab('tickets')">Trouble Tickets</button>
+    <button class="tab" id="tabActions" onclick="switchTab('actions')">Action Items</button>
+    <button class="tab" id="tabDemand" onclick="switchTab('demand')">Demand</button>
+    <button class="tab" id="tabDefects" onclick="switchTab('defects')">Open Defects</button>
+  </nav>
+
+  <section id="panelTickets" class="panel active">
+  <section class="stats" id="stats"></section>
+
+  <div class="toolbar">
+    <input type="text" class="search" id="search" placeholder="Search TT type, environment, incident, application, defect&hellip;">
+    <select class="filter" id="filterType">
+      <option value="">All types</option>
+      <option>IGNITE</option>
+      <option>BAU</option>
+    </select>
+    <select class="filter" id="filterStatus">
+      <option value="">All statuses</option>
+    </select>
+    <button class="btn-ghost" id="importBtn">Import CSV</button>
+    <input type="file" id="importFile" accept=".csv" style="display:none">
+    <button class="btn-ghost" id="exportBtn">Export CSV</button>
+    <button class="btn-add" id="addBtn">+ New Ticket</button>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="sortable" onclick="sortBy('tttype')">TT Type<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortBy('incident')">Incident No<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortBy('app')">Application<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortBy('desc')">Brief Description<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortBy('status')">ADM2 Status<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortBy('defect')">Defect ID<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortBy('tester')">Tester<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortBy('comments')">Comments<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortBy('env')">Environment<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortBy('release')">Release<span class="arrow">&#9650;&#9660;</span></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="12" class="loading">Loading tickets&hellip;</td></tr>
+      </tbody>
+    </table>
+  </div>
+  </section>
+
+  <section id="panelActions" class="panel">
+  <div class="toolbar">
+    <input type="text" class="search" id="searchA" placeholder="Search action items by incident, application, owner, description&hellip;">
+    <select class="filter" id="filterTypeA">
+      <option value="">All types</option>
+      <option>IGNITE</option>
+      <option>BAU</option>
+    </select>
+    <button class="btn-ghost" id="importBtnA">Import CSV</button>
+    <input type="file" id="importFileA" accept=".csv" style="display:none">
+    <button class="btn-ghost" id="exportBtnA">Export CSV</button>
+    <button class="btn-add" id="addBtnA">+ New Action Item</button>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="sortable" onclick="sortByA('tttype')">TT Type<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByA('incident')">Incident No<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByA('app')">Application<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByA('desc')">Description<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByA('owner')">Action Owner<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByA('status')">Status<span class="arrow">&#9650;&#9660;</span></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbodyA">
+        <tr><td colspan="7" class="loading">Loading action items&hellip;</td></tr>
+      </tbody>
+    </table>
+  </div>
+  </section>
+
+  <section id="panelDemand" class="panel">
+  <div class="toolbar">
+    <input type="text" class="search" id="searchD" placeholder="Search demand by incident, application, source, description, comments&hellip;">
+    <select class="filter" id="filterTypeD">
+      <option value="">All types</option>
+      <option>IGNITE</option>
+      <option>BAU</option>
+    </select>
+    <button class="btn-ghost" id="importBtnD">Import CSV</button>
+    <input type="file" id="importFileD" accept=".csv" style="display:none">
+    <button class="btn-ghost" id="exportBtnD">Export CSV</button>
+    <button class="btn-add" id="addBtnD">+ New Demand</button>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="sortable" onclick="sortByD('tttype')">TT Type<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByD('incident')">Incident No<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByD('app')">Application<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByD('desc')">Description<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByD('source')">Source<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByD('comments')">Comments<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByD('added')">Added Date<span class="arrow">&#9650;&#9660;</span></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbodyD">
+        <tr><td colspan="8" class="loading">Loading demand&hellip;</td></tr>
+      </tbody>
+    </table>
+  </div>
+  </section>
+
+  <section id="panelDefects" class="panel">
+  <div class="toolbar">
+    <input type="text" class="search" id="searchF" placeholder="Search defects by incident, application, defect, tester, description&hellip;">
+    <select class="filter" id="filterTypeF">
+      <option value="">All types</option>
+      <option>IGNITE</option>
+      <option>BAU</option>
+    </select>
+    <button class="btn-ghost" id="importBtnF">Import CSV</button>
+    <input type="file" id="importFileF" accept=".csv" style="display:none">
+    <button class="btn-ghost" id="exportBtnF">Export CSV</button>
+    <button class="btn-add" id="addBtnF">+ New Defect</button>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="sortable" onclick="sortByF('tttype')">TT Type<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByF('incident')">Incident No<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByF('app')">Application<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByF('desc')">Description<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByF('defect')">Defect Tagged<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByF('tester')">Tester<span class="arrow">&#9650;&#9660;</span></th>
+          <th class="sortable" onclick="sortByF('comments')">Comments<span class="arrow">&#9650;&#9660;</span></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbodyF">
+        <tr><td colspan="8" class="loading">Loading defects&hellip;</td></tr>
+      </tbody>
+    </table>
+  </div>
+  </section>
+
+  <!-- Modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <h2 id="modalTitle">New Ticket</h2>
+      <p class="sub">Fields marked with * are required.</p>
+      <div class="grid2">
+        <div class="field">
+          <label>TT Type</label>
+          <select id="f_tttype">
+            <option>IGNITE</option>
+            <option>BAU</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Environment</label>
+          <select id="f_env">
+            <option>SIT</option>
+            <option>Regression</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Release</label>
+          <input type="text" id="f_release" placeholder="e.g. R2026.04">
+        </div>
+        <div class="field">
+          <label>Incident No *</label>
+          <input type="text" id="f_incident" placeholder="INC0001234">
+        </div>
+        <div class="field">
+          <label>Application *</label>
+          <input type="text" id="f_app" placeholder="e.g. Billing Portal">
+        </div>
+        <div class="field full">
+          <label>Brief Description</label>
+          <textarea id="f_desc" placeholder="Short summary of the issue"></textarea>
+        </div>
+        <div class="field">
+          <label>ADM2 Status</label>
+          <input type="text" id="f_status" placeholder="Enter status">
+        </div>
+        <div class="field">
+          <label>Defect ID</label>
+          <input type="text" id="f_defect" placeholder="DEF-0000">
+        </div>
+        <div class="field full">
+          <label>Tester</label>
+          <input type="text" id="f_tester" placeholder="Tester name">
+        </div>
+        <div class="field full">
+          <label>Comments</label>
+          <textarea id="f_comments" placeholder="Comments / notes"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="cancelBtn">Cancel</button>
+        <button class="btn-add" id="saveBtn">Save Ticket</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Item Modal -->
+  <div class="overlay" id="overlayA">
+    <div class="modal">
+      <h2 id="modalTitleA">New Action Item</h2>
+      <p class="sub">Fields marked with * are required.</p>
+      <div class="grid2">
+        <div class="field">
+          <label>TT Type</label>
+          <select id="a_tttype">
+            <option>IGNITE</option>
+            <option>BAU</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Incident No *</label>
+          <input type="text" id="a_incident" placeholder="INC0001234">
+        </div>
+        <div class="field">
+          <label>Application *</label>
+          <input type="text" id="a_app" placeholder="e.g. Billing Portal">
+        </div>
+        <div class="field">
+          <label>Action Owner</label>
+          <input type="text" id="a_owner" placeholder="Owner name">
+        </div>
+        <div class="field full">
+          <label>Description</label>
+          <textarea id="a_desc" placeholder="What needs to be done"></textarea>
+        </div>
+        <div class="field full">
+          <label>Status</label>
+          <input type="text" id="a_status" placeholder="Enter status">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="cancelBtnA">Cancel</button>
+        <button class="btn-add" id="saveBtnA">Save Action Item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demand Modal -->
+  <div class="overlay" id="overlayD">
+    <div class="modal">
+      <h2 id="modalTitleD">New Demand</h2>
+      <p class="sub">Fields marked with * are required.</p>
+      <div class="grid2">
+        <div class="field">
+          <label>TT Type</label>
+          <select id="d_tttype">
+            <option>IGNITE</option>
+            <option>BAU</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Incident No *</label>
+          <input type="text" id="d_incident" placeholder="INC0001234">
+        </div>
+        <div class="field full">
+          <label>Application *</label>
+          <input type="text" id="d_app" placeholder="e.g. Billing Portal">
+        </div>
+        <div class="field full">
+          <label>Description</label>
+          <textarea id="d_desc" placeholder="Demand description"></textarea>
+        </div>
+        <div class="field">
+          <label>Source</label>
+          <input type="text" id="d_source" placeholder="e.g. Email, Meeting, Portal">
+        </div>
+        <div class="field">
+          <label>Added Date</label>
+          <input type="date" id="d_added">
+        </div>
+        <div class="field full">
+          <label>Comments</label>
+          <textarea id="d_comments" placeholder="Comments / notes"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="cancelBtnD">Cancel</button>
+        <button class="btn-add" id="saveBtnD">Save Demand</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Open Defect Modal -->
+  <div class="overlay" id="overlayF">
+    <div class="modal">
+      <h2 id="modalTitleF">New Defect</h2>
+      <p class="sub">Fields marked with * are required.</p>
+      <div class="grid2">
+        <div class="field">
+          <label>TT Type</label>
+          <select id="x_tttype">
+            <option>IGNITE</option>
+            <option>BAU</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Incident No *</label>
+          <input type="text" id="x_incident" placeholder="INC0001234">
+        </div>
+        <div class="field">
+          <label>Application *</label>
+          <input type="text" id="x_app" placeholder="e.g. Billing Portal">
+        </div>
+        <div class="field">
+          <label>Defect Tagged</label>
+          <input type="text" id="x_defect" placeholder="DEF-0000">
+        </div>
+        <div class="field">
+          <label>Tester</label>
+          <input type="text" id="x_tester" placeholder="Tester name">
+        </div>
+        <div class="field full">
+          <label>Description</label>
+          <textarea id="x_desc" placeholder="Defect description"></textarea>
+        </div>
+        <div class="field full">
+          <label>Comments</label>
+          <textarea id="x_comments" placeholder="Comments / notes"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="cancelBtnF">Cancel</button>
+        <button class="btn-add" id="saveBtnF">Save Defect</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const KEY = 'adm2:tickets';
+  const KEY_A = 'adm2:actions';
+  const KEY_D = 'adm2:demand';
+  const KEY_F = 'adm2:defects';
+  let tickets = [];
+  let actions = [];
+  let demand = [];
+  let defects = [];
+  let editId = null;
+  let editIdA = null;
+  let editIdD = null;
+  let editIdF = null;
+  let sortKey = null, sortDir = 1;
+  let sortKeyA = null, sortDirA = 1;
+  let sortKeyD = null, sortDirD = 1;
+  let sortKeyF = null, sortDirF = 1;
+
+  const $ = id => document.getElementById(id);
+  const statusClass = s => {
+    const k = (s||'').toLowerCase();
+    if(!k) return 'closed';
+    if(/progress|wip|working/.test(k)) return 'progress';
+    if(/test|uat|sit|qa/.test(k)) return 'testing';
+    if(/resolv|fixed|done|complete/.test(k)) return 'resolved';
+    if(/hold|block|pending|wait/.test(k)) return 'hold';
+    if(/clos|cancel/.test(k)) return 'closed';
+    if(/new|open|raise/.test(k)) return 'new';
+    return 'new';
+  };
+
+  function esc(t){return (t||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+  function fmtDate(d){
+    if(!d) return '<span class="muted">&mdash;</span>';
+    const dt = new Date(d+'T00:00:00');
+    if(isNaN(dt)) return esc(d);
+    return dt.toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'});
+  }
+
+  function normDate(v){
+    if(!v) return '';
+    v = v.trim();
+    if(/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+    const d = new Date(v);
+    if(!isNaN(d)) return d.toISOString().slice(0,10);
+    return v;
+  }
+
+  // case-insensitive, numeric-aware comparison
+  function cmp(a, b){
+    a = (a||'').toString(); b = (b||'').toString();
+    return a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'});
+  }
+  function sortRows(rows, key, dir){
+    if(!key) return rows;
+    return rows.slice().sort((x,y)=>dir*cmp(x[key], y[key]));
+  }
+  function markHeaders(tbodyId, key, dir){
+    const table = $(tbodyId).closest('table');
+    table.querySelectorAll('thead th.sortable').forEach(th=>{
+      th.classList.remove('sorted');
+      const ar = th.querySelector('.arrow');
+      if(ar) ar.innerHTML = '&#9650;&#9660;';
+    });
+    if(key){
+      table.querySelectorAll('thead th.sortable').forEach(th=>{
+        if(th.getAttribute('onclick')&&th.getAttribute('onclick').includes("'"+key+"'")){
+          th.classList.add('sorted');
+          const ar = th.querySelector('.arrow');
+          if(ar) ar.innerHTML = dir>0 ? '&#9650;' : '&#9660;';
+        }
+      });
+    }
+  }
+
+  window.sortBy = key => {
+    if(sortKey===key){ sortDir *= -1; } else { sortKey = key; sortDir = 1; }
+    render();
+  };
+  window.sortByA = key => {
+    if(sortKeyA===key){ sortDirA *= -1; } else { sortKeyA = key; sortDirA = 1; }
+    renderActions();
+  };
+  window.sortByD = key => {
+    if(sortKeyD===key){ sortDirD *= -1; } else { sortKeyD = key; sortDirD = 1; }
+    renderDemand();
+  };
+  window.sortByF = key => {
+    if(sortKeyF===key){ sortDirF *= -1; } else { sortKeyF = key; sortDirF = 1; }
+    renderDefects();
+  };
+
+  // ---- persistence ----
+  async function load(){
+    try{
+      const res = await window.storage.get(KEY);
+      tickets = res && res.value ? JSON.parse(res.value) : [];
+    }catch(e){ tickets = []; }
+    try{
+      const resA = await window.storage.get(KEY_A);
+      actions = resA && resA.value ? JSON.parse(resA.value) : [];
+    }catch(e){ actions = []; }
+    try{
+      const resD = await window.storage.get(KEY_D);
+      demand = resD && resD.value ? JSON.parse(resD.value) : [];
+    }catch(e){ demand = []; }
+    try{
+      const resF = await window.storage.get(KEY_F);
+      defects = resF && resF.value ? JSON.parse(resF.value) : [];
+    }catch(e){ defects = []; }
+    render();
+    renderActions();
+    renderDemand();
+    renderDefects();
+  }
+  async function save(){
+    try{ await window.storage.set(KEY, JSON.stringify(tickets)); }
+    catch(e){ console.error('save failed', e); }
+  }
+  async function saveA(){
+    try{ await window.storage.set(KEY_A, JSON.stringify(actions)); }
+    catch(e){ console.error('saveA failed', e); }
+  }
+  async function saveD(){
+    try{ await window.storage.set(KEY_D, JSON.stringify(demand)); }
+    catch(e){ console.error('saveD failed', e); }
+  }
+  async function saveF(){
+    try{ await window.storage.set(KEY_F, JSON.stringify(defects)); }
+    catch(e){ console.error('saveF failed', e); }
+  }
+
+  // ---- rendering ----
+  function render(){
+    const q = $('search').value.trim().toLowerCase();
+    const fs = $('filterStatus').value;
+    const ft = $('filterType').value;
+    let rows = tickets.filter(t=>{
+      const blob = [t.tttype,t.env,t.release,t.incident,t.app,t.desc,t.defect,t.tester,t.comments,t.status].join(' ').toLowerCase();
+      return (!q || blob.includes(q)) && (!fs || t.status===fs) && (!ft || t.tttype===ft);
+    });
+    rows = sortRows(rows, sortKey, sortDir);
+    markHeaders('tbody', sortKey, sortDir);
+
+    const tb = $('tbody');
+    if(rows.length===0){
+      tb.innerHTML = `<tr><td colspan="12" class="empty">
+        <strong>${tickets.length===0?'No tickets yet':'No matches'}</strong>
+        ${tickets.length===0?'Add your first trouble ticket to start tracking.':'Try a different search or filter.'}
+      </td></tr>`;
+    } else {
+      tb.innerHTML = rows.map(t=>`
+        <tr>
+          <td>${t.tttype?`<span class="pill ${t.tttype==='BAU'?'closed':'testing'}">${esc(t.tttype)}</span>`:'<span class="muted">&mdash;</span>'}</td>
+          <td class="inc-no">${esc(t.incident)}</td>
+          <td>${esc(t.app)}</td>
+          <td class="desc">${t.desc?esc(t.desc):'<span class="muted">&mdash;</span>'}</td>
+          <td>${t.status?`<span class="pill ${statusClass(t.status)}">${esc(t.status)}</span>`:'<span class="muted">&mdash;</span>'}</td>
+          <td>${t.defect?esc(t.defect):'<span class="muted">&mdash;</span>'}</td>
+          <td>${t.tester?esc(t.tester):'<span class="muted">&mdash;</span>'}</td>
+          <td class="desc">${t.comments?esc(t.comments):'<span class="muted">&mdash;</span>'}</td>
+          <td>${t.env?esc(t.env):'<span class="muted">&mdash;</span>'}</td>
+          <td>${t.release?esc(t.release):'<span class="muted">&mdash;</span>'}</td>
+          <td class="row-actions">
+            <button onclick="editTicket('${t.id}')">Edit</button>
+            <button class="del" onclick="delTicket('${t.id}')">Delete</button>
+          </td>
+        </tr>`).join('');
+    }
+    refreshStatusFilter();
+    renderStats();
+  }
+
+  function refreshStatusFilter(){
+    const sel = $('filterStatus');
+    const current = sel.value;
+    const seen = [...new Set(tickets.map(t=>t.status).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">All statuses</option>' +
+      seen.map(s=>`<option ${s===current?'selected':''}>${esc(s)}</option>`).join('');
+  }
+
+  function renderStats(){
+    const k = t => (t.status||'').toLowerCase();
+    const inProgress = tickets.filter(t=>/in progress|testing in progress|test in progress|wip|ongoing/.test(k(t))).length;
+    const failed = tickets.filter(t=>/fail|defect|error|reject/.test(k(t))).length;
+    const completed = tickets.filter(t=>/complete|completed|pass|done|closed/.test(k(t))).length;
+    const waiting = tickets.filter(t=>/wait|waiting|hold|pending|blocked|input/.test(k(t))).length;
+    $('stats').innerHTML = `
+      <div class="stat"><div class="num">${tickets.length}</div><div class="lbl">Total</div></div>
+      <div class="stat t"><div class="num">${inProgress}</div><div class="lbl">Test in Progress</div></div>
+      <div class="stat r"><div class="num">${failed}</div><div class="lbl">Failed</div></div>
+      <div class="stat g"><div class="num">${completed}</div><div class="lbl">Testing Completed</div></div>
+      <div class="stat a"><div class="num">${waiting}</div><div class="lbl">Waiting for Inputs</div></div>`;
+  }
+
+  // ---- modal ----
+  function openModal(t){
+    editId = t ? t.id : null;
+    $('modalTitle').textContent = t ? 'Edit Ticket' : 'New Ticket';
+    $('f_tttype').value = t? (t.tttype||'IGNITE') : 'IGNITE';
+    $('f_env').value = t? (t.env||'SIT') : 'SIT';
+    $('f_release').value = t? (t.release||'') : '';
+    $('f_incident').value = t? t.incident : '';
+    $('f_app').value = t? t.app : '';
+    $('f_status').value = t? (t.status||'') : '';
+    $('f_desc').value = t? t.desc : '';
+    $('f_defect').value = t? t.defect : '';
+    $('f_tester').value = t? t.tester : '';
+    $('f_comments').value = t? (t.comments||'') : '';
+    $('overlay').classList.add('show');
+    $('f_incident').focus();
+  }
+  function closeModal(){ $('overlay').classList.remove('show'); editId=null; }
+
+  window.editTicket = id => openModal(tickets.find(t=>t.id===id));
+  window.delTicket = async id => {
+    if(!confirm('Delete this ticket?')) return;
+    tickets = tickets.filter(t=>t.id!==id);
+    await save(); render();
+  };
+
+  async function saveTicket(){
+    const inc = $('f_incident').value.trim();
+    const app = $('f_app').value.trim();
+    if(!inc || !app){ alert('Incident No and Application are required.'); return; }
+    const data = {
+      tttype:$('f_tttype').value.trim(), env:$('f_env').value.trim(), release:$('f_release').value.trim(),
+      incident:inc, app, status:$('f_status').value.trim(), desc:$('f_desc').value.trim(),
+      defect:$('f_defect').value.trim(), tester:$('f_tester').value.trim(),
+      comments:$('f_comments').value.trim()
+    };
+    if(editId){
+      const i = tickets.findIndex(t=>t.id===editId);
+      tickets[i] = {...tickets[i], ...data};
+    } else {
+      tickets.unshift({id:'t_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), ...data});
+    }
+    await save(); closeModal(); render();
+  }
+
+  // ---- export ----
+  function exportCSV(){
+    const cols = ['TT Type','Incident No','Application','Brief Description','ADM2 Status','Defect ID','Tester','Comments','Environment','Release'];
+    const lines = [cols.join(',')];
+    tickets.forEach(t=>{
+      const r = [t.tttype,t.incident,t.app,t.desc,t.status,t.defect,t.tester,t.comments,t.env,t.release]
+        .map(v=>`"${(v||'').replace(/"/g,'""')}"`);
+      lines.push(r.join(','));
+    });
+    const blob = new Blob([lines.join('\n')],{type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'adm2_tickets.csv';
+    a.click();
+  }
+
+  // ---- import ----
+  // Minimal RFC-4180 CSV parser (handles quotes, commas, newlines inside fields)
+  function parseCSV(text){
+    const rows = []; let row = []; let field = ''; let i = 0; let inQ = false;
+    text = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+    while(i < text.length){
+      const c = text[i];
+      if(inQ){
+        if(c === '"'){
+          if(text[i+1] === '"'){ field += '"'; i += 2; continue; }
+          inQ = false; i++; continue;
+        }
+        field += c; i++; continue;
+      }
+      if(c === '"'){ inQ = true; i++; continue; }
+      if(c === ','){ row.push(field); field=''; i++; continue; }
+      if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; i++; continue; }
+      field += c; i++;
+    }
+    if(field.length || row.length){ row.push(field); rows.push(row); }
+    return rows.filter(r => r.some(c => c.trim() !== ''));
+  }
+
+  // map a normalized header label to a ticket key
+  function headerKey(h){
+    const k = h.trim().toLowerCase();
+    if(/tt\s*type|^type$|ticket\s*type/.test(k)) return 'tttype';
+    if(/environment|^env/.test(k)) return 'env';
+    if(/release|^rel\b/.test(k)) return 'release';
+    if(/incident/.test(k)) return 'incident';
+    if(/application|^app/.test(k)) return 'app';
+    if(/desc/.test(k)) return 'desc';
+    if(/status/.test(k)) return 'status';
+    if(/defect/.test(k)) return 'defect';
+    if(/tester/.test(k)) return 'tester';
+    if(/comment/.test(k)) return 'comments';
+    return null;
+  }
+
+  function importCSV(file){
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try{
+        const rows = parseCSV(reader.result);
+        if(rows.length < 2){ alert('No data rows found in the CSV.'); return; }
+        const headers = rows[0].map(headerKey);
+        if(!headers.includes('incident')){
+          alert('Could not find an "Incident No" column. Please check the CSV headers.');
+          return;
+        }
+        let added = 0, updated = 0;
+        for(let r = 1; r < rows.length; r++){
+          const rec = {};
+          headers.forEach((key, idx) => { if(key) rec[key] = (rows[r][idx]||'').trim(); });
+          if(!rec.incident) continue;
+          if(rec.tttype) rec.tttype = matchType(rec.tttype);
+          if(rec.env) rec.env = matchEnv(rec.env);
+          const existing = tickets.find(t => t.incident.toLowerCase() === rec.incident.toLowerCase());
+          if(existing){ Object.assign(existing, rec); updated++; }
+          else {
+            tickets.unshift({
+              id:'t_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+              tttype:'IGNITE', env:'SIT', release:'', incident:'', app:'', desc:'',
+              status:'', defect:'', tester:'', comments:'', ...rec
+            });
+            added++;
+          }
+        }
+        await save(); render();
+        alert(`Import complete: ${added} added, ${updated} updated.`);
+      }catch(e){
+        console.error(e);
+        alert('Could not read the CSV file. Please make sure it is a valid CSV.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function matchType(s){
+    return /bau/i.test(s) ? 'BAU' : 'IGNITE';
+  }
+
+  function matchEnv(s){
+    return /regress/i.test(s) ? 'Regression' : 'SIT';
+  }
+
+  // ===== ACTION ITEMS =====
+  function switchTab(which){
+    const tabs = {tickets:'Tickets', actions:'Actions', demand:'Demand', defects:'Defects'};
+    Object.keys(tabs).forEach(k=>{
+      const on = k===which;
+      $('tab'+tabs[k]).classList.toggle('active', on);
+      $('panel'+tabs[k]).classList.toggle('active', on);
+    });
+  }
+  window.switchTab = switchTab;
+
+  function renderActions(){
+    const q = $('searchA').value.trim().toLowerCase();
+    const ft = $('filterTypeA').value;
+    const rows = actions.filter(a=>{
+      const blob = [a.tttype,a.incident,a.app,a.desc,a.owner,a.status].join(' ').toLowerCase();
+      return (!q || blob.includes(q)) && (!ft || a.tttype===ft);
+    });
+    const sorted = sortRows(rows, sortKeyA, sortDirA);
+    markHeaders('tbodyA', sortKeyA, sortDirA);
+    const tb = $('tbodyA');
+    if(rows.length===0){
+      tb.innerHTML = `<tr><td colspan="7" class="empty">
+        <strong>${actions.length===0?'No action items yet':'No matches'}</strong>
+        ${actions.length===0?'Add your first action item to start tracking.':'Try a different search or filter.'}
+      </td></tr>`;
+    } else {
+      tb.innerHTML = sorted.map(a=>`
+        <tr>
+          <td>${a.tttype?`<span class="pill ${a.tttype==='BAU'?'closed':'testing'}">${esc(a.tttype)}</span>`:'<span class="muted">&mdash;</span>'}</td>
+          <td class="inc-no">${esc(a.incident)}</td>
+          <td>${esc(a.app)}</td>
+          <td class="desc">${a.desc?esc(a.desc):'<span class="muted">&mdash;</span>'}</td>
+          <td>${a.owner?esc(a.owner):'<span class="muted">Unassigned</span>'}</td>
+          <td>${a.status?`<span class="pill ${statusClass(a.status)}">${esc(a.status)}</span>`:'<span class="muted">&mdash;</span>'}</td>
+          <td class="row-actions">
+            <button onclick="editAction('${a.id}')">Edit</button>
+            <button class="del" onclick="delAction('${a.id}')">Delete</button>
+          </td>
+        </tr>`).join('');
+    }
+  }
+
+  function openModalA(a){
+    editIdA = a ? a.id : null;
+    $('modalTitleA').textContent = a ? 'Edit Action Item' : 'New Action Item';
+    $('a_tttype').value = a? (a.tttype||'IGNITE') : 'IGNITE';
+    $('a_incident').value = a? a.incident : '';
+    $('a_app').value = a? a.app : '';
+    $('a_owner').value = a? (a.owner||'') : '';
+    $('a_desc').value = a? (a.desc||'') : '';
+    $('a_status').value = a? (a.status||'') : '';
+    $('overlayA').classList.add('show');
+    $('a_incident').focus();
+  }
+  function closeModalA(){ $('overlayA').classList.remove('show'); editIdA=null; }
+
+  window.editAction = id => openModalA(actions.find(a=>a.id===id));
+  window.delAction = async id => {
+    if(!confirm('Delete this action item?')) return;
+    actions = actions.filter(a=>a.id!==id);
+    await saveA(); renderActions();
+  };
+
+  async function saveAction(){
+    const inc = $('a_incident').value.trim();
+    const app = $('a_app').value.trim();
+    if(!inc || !app){ alert('Incident No and Application are required.'); return; }
+    const data = {
+      tttype:$('a_tttype').value.trim(), incident:inc, app,
+      desc:$('a_desc').value.trim(), owner:$('a_owner').value.trim(),
+      status:$('a_status').value.trim()
+    };
+    if(editIdA){
+      const i = actions.findIndex(a=>a.id===editIdA);
+      actions[i] = {...actions[i], ...data};
+    } else {
+      actions.unshift({id:'a_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), ...data});
+    }
+    await saveA(); closeModalA(); renderActions();
+  }
+
+  function exportCSVA(){
+    const cols = ['TT Type','Incident No','Application','Description','Action Owner','Status'];
+    const lines = [cols.join(',')];
+    actions.forEach(a=>{
+      const r = [a.tttype,a.incident,a.app,a.desc,a.owner,a.status]
+        .map(v=>`"${(v||'').replace(/"/g,'""')}"`);
+      lines.push(r.join(','));
+    });
+    const blob = new Blob([lines.join('\n')],{type:'text/csv'});
+    const el = document.createElement('a');
+    el.href = URL.createObjectURL(blob);
+    el.download = 'adm2_action_items.csv';
+    el.click();
+  }
+
+  function headerKeyA(h){
+    const k = h.trim().toLowerCase();
+    if(/tt\s*type|^type$|ticket\s*type/.test(k)) return 'tttype';
+    if(/incident/.test(k)) return 'incident';
+    if(/application|^app/.test(k)) return 'app';
+    if(/desc/.test(k)) return 'desc';
+    if(/owner/.test(k)) return 'owner';
+    if(/status/.test(k)) return 'status';
+    return null;
+  }
+
+  function importCSVA(file){
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try{
+        const rows = parseCSV(reader.result);
+        if(rows.length < 2){ alert('No data rows found in the CSV.'); return; }
+        const headers = rows[0].map(headerKeyA);
+        if(!headers.includes('incident')){
+          alert('Could not find an "Incident No" column. Please check the CSV headers.');
+          return;
+        }
+        let added = 0, updated = 0;
+        for(let r = 1; r < rows.length; r++){
+          const rec = {};
+          headers.forEach((key, idx) => { if(key) rec[key] = (rows[r][idx]||'').trim(); });
+          if(!rec.incident) continue;
+          if(rec.tttype) rec.tttype = matchType(rec.tttype);
+          const existing = actions.find(a => a.incident.toLowerCase() === rec.incident.toLowerCase());
+          if(existing){ Object.assign(existing, rec); updated++; }
+          else {
+            actions.unshift({
+              id:'a_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+              tttype:'IGNITE', incident:'', app:'', desc:'', owner:'', status:'', ...rec
+            });
+            added++;
+          }
+        }
+        await saveA(); renderActions();
+        alert(`Import complete: ${added} added, ${updated} updated.`);
+      }catch(e){
+        console.error(e);
+        alert('Could not read the CSV file. Please make sure it is a valid CSV.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ===== DEMAND =====
+  function renderDemand(){
+    const q = $('searchD').value.trim().toLowerCase();
+    const ft = $('filterTypeD').value;
+    const rows = demand.filter(d=>{
+      const blob = [d.tttype,d.incident,d.app,d.desc,d.source,d.comments,d.added].join(' ').toLowerCase();
+      return (!q || blob.includes(q)) && (!ft || d.tttype===ft);
+    });
+    const sorted = sortRows(rows, sortKeyD, sortDirD);
+    markHeaders('tbodyD', sortKeyD, sortDirD);
+    const tb = $('tbodyD');
+    if(rows.length===0){
+      tb.innerHTML = `<tr><td colspan="8" class="empty">
+        <strong>${demand.length===0?'No demand items yet':'No matches'}</strong>
+        ${demand.length===0?'Add your first demand to start tracking.':'Try a different search or filter.'}
+      </td></tr>`;
+    } else {
+      tb.innerHTML = sorted.map(d=>`
+        <tr>
+          <td>${d.tttype?`<span class="pill ${d.tttype==='BAU'?'closed':'testing'}">${esc(d.tttype)}</span>`:'<span class="muted">&mdash;</span>'}</td>
+          <td class="inc-no">${esc(d.incident)}</td>
+          <td>${esc(d.app)}</td>
+          <td class="desc">${d.desc?esc(d.desc):'<span class="muted">&mdash;</span>'}</td>
+          <td>${d.source?esc(d.source):'<span class="muted">&mdash;</span>'}</td>
+          <td class="desc">${d.comments?esc(d.comments):'<span class="muted">&mdash;</span>'}</td>
+          <td>${fmtDate(d.added)}</td>
+          <td class="row-actions">
+            <button onclick="editDemand('${d.id}')">Edit</button>
+            <button class="del" onclick="delDemand('${d.id}')">Delete</button>
+          </td>
+        </tr>`).join('');
+    }
+  }
+
+  function openModalD(d){
+    editIdD = d ? d.id : null;
+    $('modalTitleD').textContent = d ? 'Edit Demand' : 'New Demand';
+    $('d_tttype').value = d? (d.tttype||'IGNITE') : 'IGNITE';
+    $('d_incident').value = d? d.incident : '';
+    $('d_app').value = d? d.app : '';
+    $('d_desc').value = d? (d.desc||'') : '';
+    $('d_source').value = d? (d.source||'') : '';
+    $('d_added').value = d? (d.added||'') : new Date().toISOString().slice(0,10);
+    $('d_comments').value = d? (d.comments||'') : '';
+    $('overlayD').classList.add('show');
+    $('d_incident').focus();
+  }
+  function closeModalD(){ $('overlayD').classList.remove('show'); editIdD=null; }
+
+  window.editDemand = id => openModalD(demand.find(d=>d.id===id));
+  window.delDemand = async id => {
+    if(!confirm('Delete this demand item?')) return;
+    demand = demand.filter(d=>d.id!==id);
+    await saveD(); renderDemand();
+  };
+
+  async function saveDemand(){
+    const inc = $('d_incident').value.trim();
+    const app = $('d_app').value.trim();
+    if(!inc || !app){ alert('Incident No and Application are required.'); return; }
+    const data = {
+      tttype:$('d_tttype').value.trim(), incident:inc, app,
+      desc:$('d_desc').value.trim(), source:$('d_source').value.trim(),
+      added:$('d_added').value, comments:$('d_comments').value.trim()
+    };
+    if(editIdD){
+      const i = demand.findIndex(d=>d.id===editIdD);
+      demand[i] = {...demand[i], ...data};
+    } else {
+      demand.unshift({id:'d_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), ...data});
+    }
+    await saveD(); closeModalD(); renderDemand();
+  }
+
+  function exportCSVD(){
+    const cols = ['TT Type','Incident No','Application','Description','Source','Comments','Added Date'];
+    const lines = [cols.join(',')];
+    demand.forEach(d=>{
+      const r = [d.tttype,d.incident,d.app,d.desc,d.source,d.comments,d.added]
+        .map(v=>`"${(v||'').replace(/"/g,'""')}"`);
+      lines.push(r.join(','));
+    });
+    const blob = new Blob([lines.join('\n')],{type:'text/csv'});
+    const el = document.createElement('a');
+    el.href = URL.createObjectURL(blob);
+    el.download = 'adm2_demand.csv';
+    el.click();
+  }
+
+  function headerKeyD(h){
+    const k = h.trim().toLowerCase();
+    if(/tt\s*type|^type$|ticket\s*type/.test(k)) return 'tttype';
+    if(/incident/.test(k)) return 'incident';
+    if(/application|^app/.test(k)) return 'app';
+    if(/source/.test(k)) return 'source';
+    if(/added|^date|created/.test(k)) return 'added';
+    if(/comment/.test(k)) return 'comments';
+    if(/desc/.test(k)) return 'desc';
+    return null;
+  }
+
+  function importCSVD(file){
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try{
+        const rows = parseCSV(reader.result);
+        if(rows.length < 2){ alert('No data rows found in the CSV.'); return; }
+        const headers = rows[0].map(headerKeyD);
+        if(!headers.includes('incident')){
+          alert('Could not find an "Incident No" column. Please check the CSV headers.');
+          return;
+        }
+        let added = 0, updated = 0;
+        for(let r = 1; r < rows.length; r++){
+          const rec = {};
+          headers.forEach((key, idx) => { if(key) rec[key] = (rows[r][idx]||'').trim(); });
+          if(!rec.incident) continue;
+          if(rec.tttype) rec.tttype = matchType(rec.tttype);
+          if(rec.added) rec.added = normDate(rec.added);
+          const existing = demand.find(d => d.incident.toLowerCase() === rec.incident.toLowerCase());
+          if(existing){ Object.assign(existing, rec); updated++; }
+          else {
+            demand.unshift({
+              id:'d_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+              tttype:'IGNITE', incident:'', app:'', desc:'', source:'', comments:'', added:'', ...rec
+            });
+            added++;
+          }
+        }
+        await saveD(); renderDemand();
+        alert(`Import complete: ${added} added, ${updated} updated.`);
+      }catch(e){
+        console.error(e);
+        alert('Could not read the CSV file. Please make sure it is a valid CSV.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ===== OPEN DEFECTS =====
+  function renderDefects(){
+    const q = $('searchF').value.trim().toLowerCase();
+    const ft = $('filterTypeF').value;
+    const rows = defects.filter(f=>{
+      const blob = [f.tttype,f.incident,f.app,f.desc,f.defect,f.tester,f.comments].join(' ').toLowerCase();
+      return (!q || blob.includes(q)) && (!ft || f.tttype===ft);
+    });
+    const sorted = sortRows(rows, sortKeyF, sortDirF);
+    markHeaders('tbodyF', sortKeyF, sortDirF);
+    const tb = $('tbodyF');
+    if(rows.length===0){
+      tb.innerHTML = `<tr><td colspan="8" class="empty">
+        <strong>${defects.length===0?'No open defects yet':'No matches'}</strong>
+        ${defects.length===0?'Add your first defect to start tracking.':'Try a different search or filter.'}
+      </td></tr>`;
+    } else {
+      tb.innerHTML = sorted.map(f=>`
+        <tr>
+          <td>${f.tttype?`<span class="pill ${f.tttype==='BAU'?'closed':'testing'}">${esc(f.tttype)}</span>`:'<span class="muted">&mdash;</span>'}</td>
+          <td class="inc-no">${esc(f.incident)}</td>
+          <td>${esc(f.app)}</td>
+          <td class="desc">${f.desc?esc(f.desc):'<span class="muted">&mdash;</span>'}</td>
+          <td>${f.defect?esc(f.defect):'<span class="muted">&mdash;</span>'}</td>
+          <td>${f.tester?esc(f.tester):'<span class="muted">&mdash;</span>'}</td>
+          <td class="desc">${f.comments?esc(f.comments):'<span class="muted">&mdash;</span>'}</td>
+          <td class="row-actions">
+            <button onclick="editDefect('${f.id}')">Edit</button>
+            <button class="del" onclick="delDefect('${f.id}')">Delete</button>
+          </td>
+        </tr>`).join('');
+    }
+  }
+
+  function openModalF(f){
+    editIdF = f ? f.id : null;
+    $('modalTitleF').textContent = f ? 'Edit Defect' : 'New Defect';
+    $('x_tttype').value = f? (f.tttype||'IGNITE') : 'IGNITE';
+    $('x_incident').value = f? f.incident : '';
+    $('x_app').value = f? f.app : '';
+    $('x_defect').value = f? (f.defect||'') : '';
+    $('x_tester').value = f? (f.tester||'') : '';
+    $('x_desc').value = f? (f.desc||'') : '';
+    $('x_comments').value = f? (f.comments||'') : '';
+    $('overlayF').classList.add('show');
+    $('x_incident').focus();
+  }
+  function closeModalF(){ $('overlayF').classList.remove('show'); editIdF=null; }
+
+  window.editDefect = id => openModalF(defects.find(f=>f.id===id));
+  window.delDefect = async id => {
+    if(!confirm('Delete this defect?')) return;
+    defects = defects.filter(f=>f.id!==id);
+    await saveF(); renderDefects();
+  };
+
+  async function saveDefect(){
+    const inc = $('x_incident').value.trim();
+    const app = $('x_app').value.trim();
+    if(!inc || !app){ alert('Incident No and Application are required.'); return; }
+    const data = {
+      tttype:$('x_tttype').value.trim(), incident:inc, app,
+      desc:$('x_desc').value.trim(), defect:$('x_defect').value.trim(),
+      tester:$('x_tester').value.trim(), comments:$('x_comments').value.trim()
+    };
+    if(editIdF){
+      const i = defects.findIndex(f=>f.id===editIdF);
+      defects[i] = {...defects[i], ...data};
+    } else {
+      defects.unshift({id:'f_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), ...data});
+    }
+    await saveF(); closeModalF(); renderDefects();
+  }
+
+  function exportCSVF(){
+    const cols = ['TT Type','Incident No','Application','Description','Defect Tagged','Tester','Comments'];
+    const lines = [cols.join(',')];
+    defects.forEach(f=>{
+      const r = [f.tttype,f.incident,f.app,f.desc,f.defect,f.tester,f.comments]
+        .map(v=>`"${(v||'').replace(/"/g,'""')}"`);
+      lines.push(r.join(','));
+    });
+    const blob = new Blob([lines.join('\n')],{type:'text/csv'});
+    const el = document.createElement('a');
+    el.href = URL.createObjectURL(blob);
+    el.download = 'adm2_open_defects.csv';
+    el.click();
+  }
+
+  function headerKeyF(h){
+    const k = h.trim().toLowerCase();
+    if(/tt\s*type|^type$|ticket\s*type/.test(k)) return 'tttype';
+    if(/incident/.test(k)) return 'incident';
+    if(/application|^app/.test(k)) return 'app';
+    if(/tester/.test(k)) return 'tester';
+    if(/defect|tagged/.test(k)) return 'defect';
+    if(/comment/.test(k)) return 'comments';
+    if(/desc/.test(k)) return 'desc';
+    return null;
+  }
+
+  function importCSVF(file){
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try{
+        const rows = parseCSV(reader.result);
+        if(rows.length < 2){ alert('No data rows found in the CSV.'); return; }
+        const headers = rows[0].map(headerKeyF);
+        if(!headers.includes('incident')){
+          alert('Could not find an "Incident No" column. Please check the CSV headers.');
+          return;
+        }
+        let added = 0, updated = 0;
+        for(let r = 1; r < rows.length; r++){
+          const rec = {};
+          headers.forEach((key, idx) => { if(key) rec[key] = (rows[r][idx]||'').trim(); });
+          if(!rec.incident) continue;
+          if(rec.tttype) rec.tttype = matchType(rec.tttype);
+          const existing = defects.find(f => f.incident.toLowerCase() === rec.incident.toLowerCase());
+          if(existing){ Object.assign(existing, rec); updated++; }
+          else {
+            defects.unshift({
+              id:'f_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+              tttype:'IGNITE', incident:'', app:'', desc:'', defect:'', tester:'', comments:'', ...rec
+            });
+            added++;
+          }
+        }
+        await saveF(); renderDefects();
+        alert(`Import complete: ${added} added, ${updated} updated.`);
+      }catch(e){
+        console.error(e);
+        alert('Could not read the CSV file. Please make sure it is a valid CSV.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ---- wire up ----
+  $('addBtn').onclick = ()=>openModal(null);
+  $('cancelBtn').onclick = closeModal;
+  $('saveBtn').onclick = saveTicket;
+  $('exportBtn').onclick = exportCSV;
+  $('importBtn').onclick = ()=>$('importFile').click();
+  $('importFile').onchange = e=>{
+    const f = e.target.files[0];
+    if(f) importCSV(f);
+    e.target.value = '';
+  };
+  $('search').oninput = render;
+  $('filterStatus').onchange = render;
+  $('filterType').onchange = render;
+  $('overlay').onclick = e=>{ if(e.target===$('overlay')) closeModal(); };
+
+  $('addBtnA').onclick = ()=>openModalA(null);
+  $('cancelBtnA').onclick = closeModalA;
+  $('saveBtnA').onclick = saveAction;
+  $('exportBtnA').onclick = exportCSVA;
+  $('importBtnA').onclick = ()=>$('importFileA').click();
+  $('importFileA').onchange = e=>{
+    const f = e.target.files[0];
+    if(f) importCSVA(f);
+    e.target.value = '';
+  };
+  $('searchA').oninput = renderActions;
+  $('filterTypeA').onchange = renderActions;
+  $('overlayA').onclick = e=>{ if(e.target===$('overlayA')) closeModalA(); };
+
+  $('addBtnD').onclick = ()=>openModalD(null);
+  $('cancelBtnD').onclick = closeModalD;
+  $('saveBtnD').onclick = saveDemand;
+  $('exportBtnD').onclick = exportCSVD;
+  $('importBtnD').onclick = ()=>$('importFileD').click();
+  $('importFileD').onchange = e=>{
+    const f = e.target.files[0];
+    if(f) importCSVD(f);
+    e.target.value = '';
+  };
+  $('searchD').oninput = renderDemand;
+  $('filterTypeD').onchange = renderDemand;
+  $('overlayD').onclick = e=>{ if(e.target===$('overlayD')) closeModalD(); };
+
+  $('addBtnF').onclick = ()=>openModalF(null);
+  $('cancelBtnF').onclick = closeModalF;
+  $('saveBtnF').onclick = saveDefect;
+  $('exportBtnF').onclick = exportCSVF;
+  $('importBtnF').onclick = ()=>$('importFileF').click();
+  $('importFileF').onchange = e=>{
+    const f = e.target.files[0];
+    if(f) importCSVF(f);
+    e.target.value = '';
+  };
+  $('searchF').oninput = renderDefects;
+  $('filterTypeF').onchange = renderDefects;
+  $('overlayF').onclick = e=>{ if(e.target===$('overlayF')) closeModalF(); };
+
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeModal(); closeModalA(); closeModalD(); closeModalF(); } });
+  $('datestamp').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  load();
+</script>
+</body>
+</html>
