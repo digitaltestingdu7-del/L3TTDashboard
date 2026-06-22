@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Execution Dashboard</title>
+<style>
+  :root{
+    --blue-deep:#0d1b3e;
+    --blue-mid:#1f4e9b;
+    --blue-bright:#1aa3e8;
+    --blue-cyan:#18c1f0;
+    --red:#e23b4e;
+    --navy:#16244a;
+    --row-alt:#eef4fb;
+    --row-base:#ffffff;
+    --border:#d9e3f0;
+    --text:#1d2433;
+    --muted:#5a6678;
+    --head-text:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    background:#f4f7fb;
+    color:var(--text);
+    padding:28px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;}
+
+  /* Section header bar with gradient */
+  .section-head{
+    background:linear-gradient(90deg,var(--blue-deep) 0%,var(--blue-mid) 38%,var(--blue-bright) 72%,var(--blue-cyan) 100%);
+    color:var(--head-text);
+    font-size:21px;
+    font-weight:700;
+    padding:13px 20px;
+    border-radius:5px 5px 0 0;
+    letter-spacing:.3px;
+    margin-top:34px;
+  }
+  .section-head:first-child{margin-top:0;}
+
+  /* KPI cards */
+  .kpi-zone{
+    background:#fff;
+    border:1px solid var(--border);
+    border-top:none;
+    padding:22px 20px 26px;
+    border-radius:0 0 5px 5px;
+  }
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:16px;
+  }
+  .kpi-card{
+    background:#fff;
+    border:1px solid #e6ecf4;
+    border-radius:6px;
+    padding:18px 12px 22px;
+    text-align:center;
+    box-shadow:0 2px 6px rgba(20,40,80,.06);
+  }
+  .kpi-card .label{
+    font-size:13px;
+    font-weight:700;
+    color:var(--text);
+    min-height:34px;
+    display:flex;align-items:center;justify-content:center;
+    line-height:1.25;
+  }
+  .kpi-card .rule{
+    height:1px;background:#e1e8f0;margin:8px 14px 14px;
+  }
+  .kpi-card .value{
+    font-size:30px;font-weight:800;color:#11161f;letter-spacing:-.5px;
+  }
+  .totals{
+    display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:22px;
+  }
+  .total-pill{
+    display:flex;align-items:center;gap:18px;
+    border-radius:6px;padding:16px 26px;color:#fff;
+  }
+  .total-pill.planned{background:var(--navy);}
+  .total-pill.completed{background:var(--red);}
+  .total-pill .num{font-size:32px;font-weight:800;line-height:1;}
+  .total-pill .desc{font-size:13px;font-weight:600;opacity:.92;}
+
+  /* Tables */
+  .table-zone{
+    background:#fff;border:1px solid var(--border);border-top:none;
+    border-radius:0 0 5px 5px;padding:0;overflow:hidden;
+  }
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead th{
+    background:linear-gradient(90deg,var(--blue-mid),var(--blue-bright));
+    color:#fff;font-weight:700;padding:11px 10px;text-align:center;
+    border-right:1px solid rgba(255,255,255,.18);
+    font-size:11.5px;
+  }
+  thead th:first-child{text-align:left;padding-left:16px;}
+  tbody td{
+    padding:10px;text-align:center;border-bottom:1px solid #e8eef5;color:#2a3445;
+  }
+  tbody td:first-child{text-align:left;padding-left:16px;font-weight:600;}
+  tbody tr:nth-child(even){background:var(--row-alt);}
+  tbody tr.total-row{
+    background:var(--navy)!important;color:#fff;font-weight:700;
+  }
+  tbody tr.total-row td{color:#fff;border-bottom:none;}
+
+  /* Defects table specifics */
+  .defects td:nth-child(3){text-align:left;font-weight:400;}
+  .status-pill{display:inline-block;font-weight:600;}
+
+  @media(max-width:880px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .totals{grid-template-columns:1fr;}
+    body{padding:14px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== BAU TEST SUMMARY ===== -->
+  <div class="section-head">BAU Test Summary</div>
+  <div class="kpi-zone">
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="label">Master Dynamic</div><div class="rule"></div><div class="value">71.8%</div></div>
+      <div class="kpi-card"><div class="label">Master Progression</div><div class="rule"></div><div class="value">46.1%</div></div>
+      <div class="kpi-card"><div class="label">Non-Master Dynamic</div><div class="rule"></div><div class="value">34.9%</div></div>
+      <div class="kpi-card"><div class="label">Non-Master Progression</div><div class="rule"></div><div class="value">38.9%</div></div>
+      <div class="kpi-card"><div class="label">Overall Execution</div><div class="rule"></div><div class="value">50.0%</div></div>
+    </div>
+    <div class="totals">
+      <div class="total-pill planned"><span class="num">46</span><span class="desc">Items Planned (Total)</span></div>
+      <div class="total-pill completed"><span class="num">14</span><span class="desc">Items Completed (Total)</span></div>
+    </div>
+  </div>
+
+  <!-- ===== IGNITE TEST SUMMARY ===== -->
+  <div class="section-head">IGNITE Test Summary</div>
+  <div class="kpi-zone">
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="label">Master Dynamic</div><div class="rule"></div><div class="value">68.4%</div></div>
+      <div class="kpi-card"><div class="label">Master Progression</div><div class="rule"></div><div class="value">52.7%</div></div>
+      <div class="kpi-card"><div class="label">Non-Master Dynamic</div><div class="rule"></div><div class="value">41.2%</div></div>
+      <div class="kpi-card"><div class="label">Non-Master Progression</div><div class="rule"></div><div class="value">44.5%</div></div>
+      <div class="kpi-card"><div class="label">Overall Execution</div><div class="rule"></div><div class="value">55.6%</div></div>
+    </div>
+    <div class="totals">
+      <div class="total-pill planned"><span class="num">52</span><span class="desc">Items Planned (Total)</span></div>
+      <div class="total-pill completed"><span class="num">21</span><span class="desc">Items Completed (Total)</span></div>
+    </div>
+  </div>
+
+  <!-- ===== DAILY STATUS REPORT SUMMARY ===== -->
+  <div class="section-head">Daily Status Report Summary</div>
+  <div class="table-zone">
+    <table>
+      <thead>
+        <tr>
+          <th>Status</th><th>Total Assigned</th><th>Ready For Testing</th><th>Taken For Testing</th>
+          <th>Completion %</th><th>Total TC</th><th>Pass</th><th>Fail</th>
+          <th>In Progress</th><th>Blocked</th><th>To Do</th><th>Descoped</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Master Dynamic</td><td>17</td><td>17</td><td>17</td><td>71.8%</td><td>72</td><td>51</td><td>5</td><td>6</td><td>9</td><td>0</td><td>1</td></tr>
+        <tr><td>Master Progression</td><td>17</td><td>17</td><td>17</td><td>46.1%</td><td>76</td><td>35</td><td>19</td><td>6</td><td>16</td><td>0</td><td>0</td></tr>
+        <tr><td>Non-Master Dynamic</td><td>29</td><td>28</td><td>28</td><td>34.9%</td><td>43</td><td>15</td><td>6</td><td>20</td><td>2</td><td>0</td><td>0</td></tr>
+        <tr><td>Non-Master Progression</td><td>29</td><td>28</td><td>28</td><td>38.9%</td><td>54</td><td>21</td><td>7</td><td>19</td><td>6</td><td>1</td><td>0</td></tr>
+        <tr class="total-row"><td>Total</td><td>92</td><td>90</td><td>90</td><td>—</td><td>245</td><td>122</td><td>37</td><td>51</td><td>33</td><td>1</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== AUTOMATION & STATIC SUITE SUMMARY ===== -->
+  <div class="section-head">Automation &amp; Static Suite Summary</div>
+  <div class="table-zone">
+    <table>
+      <thead>
+        <tr><th>Suite</th><th>Total Identified</th><th>Pass</th><th>% Completion</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Dynamic Automation Suite</td><td>33</td><td>17</td><td>51.5%</td></tr>
+        <tr><td>Static Automation Suite</td><td>85</td><td>67</td><td>78.8%</td></tr>
+        <tr class="total-row"><td>Total</td><td>118</td><td>84</td><td>71.2%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== DEFECTS SUMMARY ===== -->
+  <div class="section-head">Defects Summary</div>
+  <div class="table-zone">
+    <table class="defects">
+      <thead>
+        <tr><th>#</th><th>Defect ID</th><th>Summary</th><th>Status</th><th>Application</th><th>ITPM</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>QMF-159728</td><td>CR8657 Preprod – Bundle activation status not updated after EAI acknowledgement</td><td>Assigned</td><td>CRM</td><td>Magesh Inbasekaran</td></tr>
+        <tr><td>2</td><td>QMF-159706</td><td>DSP Preprod – Sign doc issue - Activate enterprise mobile service flow</td><td>Rejected</td><td>DSP</td><td>Anwar Al Houshi</td></tr>
+        <tr><td>3</td><td>QMF-159680</td><td>L3_IMP167933 – DSP Preprod – Issue date is coming in Account information page</td><td>Assigned</td><td>DSP</td><td>Shalini Venugopal</td></tr>
+        <tr><td>4</td><td>QMF-159679</td><td>L3_IM9012878 – Preprod – EAI Port is not working for Motive TT Creation</td><td>Assigned</td><td>Env_EAI</td><td>Praveen Kota</td></tr>
+        <tr><td>5</td><td>QMF-159678</td><td>Selfcare – Preprod – In Dashboard page plans are missing</td><td>Assigned</td><td>MyAccount</td><td>Shalini Venugopal</td></tr>
+        <tr><td>6</td><td>QMF-159677</td><td>CR8657 Preprod – No error thrown during prepaid adjustment for consumer when cumulative amount &gt; 100 AED</td><td>Assigned</td><td>CRM</td><td>Magesh Inbasekaran</td></tr>
+        <tr><td>7</td><td>QMF-159675</td><td>CR-8480 EAI Preprod – HTTP 4XX error for PushPrepaidCampaignDataInCVM_v1 service</td><td>Rejected</td><td>OMP</td><td>Khulood Hassani</td></tr>
+        <tr><td>8</td><td>QMF-159674</td><td>CR8657 Preprod – Error thrown from JN after submitting Bundle activation from CRM</td><td>Closed</td><td>Env_IN</td><td>Magesh Inbasekaran</td></tr>
+        <tr><td>9</td><td>QMF-159672</td><td>L3_IM9150365 Preprod – Few Flexi Plan Customers unable to subscribe to IDD Bundle</td><td>Assigned</td><td>Env_IN</td><td>Shalini Venugopal</td></tr>
+        <tr><td>10</td><td>QMF-159671</td><td>BFET-1040/1322 Preprod – BSCS DB shows 4 records but POS payment shown only 2</td><td>Assigned</td><td>BSCS</td><td>Shalini Venugopal</td></tr>
+        <tr><td>11</td><td>QMF-159668</td><td>BPT2-3146 – SMSC CDR files are falling in nlh_statistics table</td><td>Rejected</td><td>BSCS</td><td>Anwar Al Houshi</td></tr>
+        <tr><td>12</td><td>QMF-159662</td><td>BSCS_SAST_PREPROD</td><td>Open</td><td>BSCS</td><td>—</td></tr>
+        <tr><td>13</td><td>QMF-159654</td><td>DSP Preprod – Activate Enterprise Mobile Service page is not loading</td><td>Closed</td><td>DSP</td><td>Kamel Amireche</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>
